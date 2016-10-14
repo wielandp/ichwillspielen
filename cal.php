@@ -44,7 +44,7 @@ function getSetupData() {
 		mysqli_free_result($retv);
 	}
 
-	$query = "SELECT * FROM tkl_preise ORDER BY tagstunde";
+	$query = "SELECT * FROM preise ORDER BY tagstunde";
 	$retv = mysqli_query($connection, $query);
 	if (!$retv) {
 		die('Error: ' . $connection->error);
@@ -143,19 +143,28 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 	) {
       die("Buchungen sind nur in der Saison möglich.");
 	}
+	if (substr($end,0,10) > substr($setupData['maxdate'],0,10)
+	||	substr($end,0,10) < substr($setupData['mindate'],0,10)
+	) {
+      die("Buchungen sind nur in der Saison möglich (Ende).");
+	}
 	if ($id == 0) {
-        if ($typ == 1 && strtotime($start)-time()>(60*60*3)) {
+        if ($typ == 1 && strtotime($start)-time()>(60*60*2)) {
             if (!isLoggedIn())
-                die("Jugend-Buchungen können nur ab 3 Stunden vor Beginn eingetragen werden.");
+                die("Jugend-Buchungen können nur ab 2 Stunden vor Beginn eingetragen werden.");
         }
-        if ($typ == 0 && !isLoggedIn()) {
+        if ($typ == 0 && strtotime($start)-time()>(60*60*24*7*4)) {
+            if (!isLoggedIn())
+                die("Einzel-Buchungen können nur ab 4 Wochen vor Beginn eingetragen werden.");
+        }
+        if ($typ == 0 && (strlen($telnumber) == 6 || !isLoggedIn())) {
 			$query = "SELECT *, WEEKDAY('$start') wtag, HOUR('$start') hour FROM marke WHERE code='$telnumber' and used=0";
 			$retv = mysqli_query($connection, $query);
 			if (!$retv) {
 				die('Error: ' . $connection->error);
 			}
 			if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
-				$telnumber2 = $row['text']."-".$row['preis']."-".sprintf("%03d",$row['lfdnr'])."-$telnumber";
+				$telnumber2 = $row['text']."-".sprintf("%02d",$row['preis'])."-".sprintf("%03d",$row['lfdnr'])."-$telnumber";
 				$preis	= $row['preis'];
 			} else {
 				$query = "INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (2, 1, '$thisip', '$telnumber')";
@@ -308,7 +317,7 @@ function getEvents($start, $end) {
 	} else {
 	  $queryevents .= "
 				'' as firstname,
-				'' as lastname,
+				case lastname when 'Platzpflege' then lastname else '' end as lastname,
 				'' as telnumber,
 				'' as body, ";
 	}
@@ -459,7 +468,7 @@ function provideVariables() {
 	}
 
 	$arr = array();
-	$query = "SELECT * FROM tkl_preise ORDER BY tagstunde";
+	$query = "SELECT * FROM preise ORDER BY tagstunde";
 	$retv = mysqli_query($connection, $query);
 	if (!$retv) {
 		die('Error: ' . $connection->error);
