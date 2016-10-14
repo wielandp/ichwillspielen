@@ -124,8 +124,14 @@ $(document).ready(function() {
 				$calendar.weekCalendar("removeEvent", calEvent.id);
 				return false;
 			}
-			if (new Date(calEvent.start)-(new Date()) < (-1000*60*60*12) && !admin) {
-				alert("Buchungen können nur bis 12 Stunden in die Vergangeneit gemacht werden. Falsche Woche?")
+			if (new Date(calEvent.start)-(new Date()) < (-1000*60*60*48) && !admin) {
+				alert("Buchungen können nur bis 48 Stunden in die Vergangeneit gemacht werden. Falsche Woche?")
+				alert("Buchungen können nur bis 48 Stunden in die Vergangeneit gemacht werden. Falsche Woche?")
+				$calendar.weekCalendar("removeEvent", calEvent.id);
+				return;
+			}
+			if (new Date(calEvent.end)-(new Date(calEvent.start)) > (1000*60*60) && !admin) {
+				alert("Buchungen können nur für 1 Stunde gemacht werden. Oder Admin fragen.")
 				$calendar.weekCalendar("removeEvent", calEvent.id);
 				return;
 			}
@@ -203,7 +209,7 @@ $(document).ready(function() {
 				}
 			}).show();
 
-			$dialogContent.find(".date_holder").text($calendar.weekCalendar("formatDate", calEvent.start));
+			$dialogContent.find(".date_holder").text($calendar.weekCalendar("formatDate", calEvent.start)+" Platz "+(calEvent.userId+1));
 			setupStartAndEndTimeFields(startField, endField, calEvent, $calendar.weekCalendar("getTimeslotTimes", calEvent.start));
 			bodyField.val(prices[""+(calEvent.start.getDay()*100+calEvent.start.getHours())]+" EUR");
 			
@@ -266,15 +272,11 @@ $(document).ready(function() {
 			resetForm($dialogContent);
 			telnumberField = $dialogContent.find("input[name='telnumber']").val(calEvent.telnumber);
 			var startField = $dialogContent.find("select[name='start']").val(calEvent.start);
-			var endField = $dialogContent.find("select[name='end']").val(calEvent.end);
+			var endField = $dialogContent.find("select[name='end']");
+//			endField.val(calEvent.end);
 			firstnameField = $dialogContent.find("input[name='firstname']").val(calEvent.firstname);
 			
-			// temporary for old entries (with title only)
-			if(calEvent.firstname.length == 0 && calEvent.lastname.length == 0){
-				lastnameField = $dialogContent.find("input[name='lastname']").val(calEvent.title);
-			}else{
-				lastnameField = $dialogContent.find("input[name='lastname']").val(calEvent.lastname);
-			}
+			lastnameField = $dialogContent.find("input[name='lastname']").val(calEvent.lastname);
 				
 			var bodyField = $dialogContent.find("textarea[name='body']");
 			bodyField.val(calEvent.body);
@@ -285,7 +287,7 @@ $(document).ready(function() {
 			$dialogContent.dialog({
 				modal: true,
 				width: 520,
-				title: "Buchung - " + calEvent.lastname + ", " + calEvent.firstname,
+				title: "Buchung - " + calEvent.lastname + ", " + calEvent.firstname + " - Platz " + (parseInt(calEvent.userId) + 1),
 				close: function() {
 				   $dialogContent.dialog("destroy");
 				   $dialogContent.hide();
@@ -342,7 +344,7 @@ $(document).ready(function() {
 			}).show();
 
 			startField = $dialogContent.find("select[name='start']").val(calEvent.start);
-			endField = $dialogContent.find("select[name='end']").val(calEvent.end);
+//			endField.val(calEvent.end);
 			$dialogContent.find(".date_holder").text($calendar.weekCalendar("formatDate", calEvent.start));
 			setupStartAndEndTimeFields(startField, endField, calEvent, $calendar.weekCalendar("getTimeslotTimes", calEvent.start));
 			//$(window).resize().resize(); //fixes a bug in modal overlay size ??
@@ -351,6 +353,7 @@ $(document).ready(function() {
 			if (!admin) {
 				endField.attr('disabled', 'disabled');
 			}
+
 			firstnameField.focus();
 			firstnameField.trigger("change");
 		},
@@ -401,8 +404,8 @@ $(document).ready(function() {
 			$timestampsOfOptions.end[timeslotTimes[i].endFormatted] = endTime.getTime();
 
 		}
-		$endTimeOptions = $endTimeField.find("option");
-		$startTimeField.trigger("change");
+//		$endTimeOptions = $endTimeField.find("option");
+//		$startTimeField.trigger("change");
 //		$endTimeField.trigger("change");
 	}
 
