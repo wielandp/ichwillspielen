@@ -52,17 +52,25 @@ p {
 }
 
 #event_edit_container label {
-	display: inline-block; 
+	display: block;
 	width: 10em;
-	margin-top: 1em;
+	margin-top: 0em;
 	margin-bottom: 0.5em;
+	float: left;
 }
 
 #event_edit_container2 label {
-	display: inline-block; 
+	display: block;
 	width: 10em;
-	margin-top: 1em;
+	margin-top: 0em;
 	margin-bottom: 0.5em;
+	float: left;
+}
+
+li {
+    list-style: none;
+	margin-top: 0.5em;
+    float: left;
 }
 
 #login label {
@@ -81,11 +89,15 @@ select, input[type='text'], input[type='password'], textarea {
 }
 
 input[type='text'] {
-	width: 245px;
+	width: 250px;
+}
+
+input, select {
+	width: 258px;
 }
 
 input[type='password'] {
-	width: 245px;
+	width: 250px;
 }
 
 ul.formatted,ol.formatted {
