@@ -1,5 +1,5 @@
 /*
- * jQuery.weekCalendar v2.0-dev
+ * jQuery.weekCalendar v2.0.1-dev
  *
  * for support join us at the google group:
  *    - http://groups.google.com/group/jquery-week-calendar
@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2009 Rob Monie
  * Copyright (c) 2010 Julien MUETTON
+ * Copyright (c) 2016 Andreas Nitsche (small changes for Android browsers)
+ *
  * Dual licensed under the MIT and GPL licenses:
  *    http://www.opensource.org/licenses/mit-license.php
  *    http://www.gnu.org/licenses/gpl.html
@@ -23,7 +25,9 @@
 (function($) {
   // check the jquery version
   var _v = $.fn.jquery.split('.'),
-      _jQuery14OrLower = (10 * _v[0] + _v[1]) < 15;
+      _jQuery14OrLower = (10 * _v[0] + _v[1]) < 15,
+	  // ANi 20160911: Detect Android browser with user agent
+	  isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
   $.widget('ui.weekCalendar', (function() {
     var _currentAjaxCall, _hourLineTimeout;
@@ -447,6 +451,12 @@
               startMillis = startDate.getTime();
           for (var i = 0; i < options.timeslotsPerDay; i++) {
             var endMillis = startMillis + options.millisPerTimeslot;
+			// Bugfix für halbe Stunden
+			var diffMillis = date.getTime() - startMillis;
+			if (diffMillis > 0 && diffMillis < 3600000) {
+				startMillis += diffMillis;
+			}
+			// End Bugfix
             times[i] = {
                 start: new Date(startMillis),
                 startFormatted: this.formatTime(new Date(startMillis), options.timeFormat),
@@ -1064,6 +1074,20 @@
         $(renderRow).appendTo($calendarTableTbody);
       },
 
+		/*	ANi 20160911:
+			Find object offset in pure javascript. See http://stackoverflow.com/questions/4334664/cross-browser-issue-with-offset-jquery-function
+		*/
+		_findTotalOffset: function (obj) {
+			var ol = ot = 0;
+			if (obj.offsetParent) {
+				do {
+					ol += obj.offsetLeft;
+					ot += obj.offsetTop;
+				} while (obj = obj.offsetParent);
+			}
+			return {left : ol, top : ot};
+		},
+
       /*
         * setup mouse events for capturing new events
         */
@@ -1079,7 +1103,17 @@
                 $newEvent.css({lineHeight: (options.timeslotHeight - 2) + 'px', fontSize: (options.timeslotHeight / 2) + 'px'});
                 $target.append($newEvent);
 
-                var columnOffset = $target.offset().top;
+				/* 	ANi 20160911: Detect Android Browser and calculate column offset with pure javascript function
+					See "Additional Notes" on http://api.jquery.com/offset/
+					"Also, dimensions may be incorrect when the page is zoomed by the user; browsers do not expose an API to detect this condition."
+				*/
+                var columnOffset;
+				if (isAndroid) {
+					var totalOffset = self._findTotalOffset(event.target);
+					columnOffset = totalOffset.top;
+				} else {
+					columnOffset = $target.offset().top;
+				}
                 var clickY = event.pageY - columnOffset;
                 var clickYRounded = (clickY - (clickY % options.timeslotHeight)) / options.timeslotHeight;
                 var topPosition = clickYRounded * options.timeslotHeight;
@@ -2020,9 +2054,11 @@
        */
       _disableTextSelect: function($elements) {
           $elements.each(function() {
+			//if (typeof this.style.MozUserSelect !== 'undefined') {//Firefox
             if ($.browser.mozilla) {//Firefox
                 $(this).css('MozUserSelect', 'none');
-            } else if ($.browser.msie) {//IE
+			//} else if (typeof this.onselectstart !== 'undefined') {//IE
+			} else if ($.browser.msie) {//IE
                 $(this).bind('selectstart', function() {
                   return false;
                 });
