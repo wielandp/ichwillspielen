@@ -42,7 +42,15 @@ while ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
   if ($row["tag"] == 1) {
     echo "<tr><td>".$row["stunde"]."</td>";
   }
-  echo  	"<td>".$row["euro"]."</td>";
+  $color = '';
+  if ($row["euro"] == 26) {
+    $color = ' bgcolor="#FF0000"';
+  } elseif ($row["euro"] == 21) {
+    $color = ' bgcolor="#00FF00"';
+  } elseif ($row["euro"] == 18) {
+    $color = ' bgcolor="#FFFF00"';
+  }
+  echo  	"<td$color>".$row["euro"]."</td>";
   if ($row["tag"] == 0) {
     echo "</tr>";
   }

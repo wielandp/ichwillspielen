@@ -2,7 +2,9 @@
 <html>
 <head>
 	<title>TKL Hallenbelegung</title>
-
+	
+	<link href="images/icon-4x.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+    <link rel="manifest" href="/manifest.json">
 	<link rel='stylesheet' type='text/css' href='reset.css' />
 	<link rel='stylesheet' type='text/css' href='libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
 	<link rel='stylesheet' type='text/css' href='jquery.weekcalendar.css' />
@@ -12,8 +14,8 @@
 	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
 	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js'></script>
 	<script type="text/javascript" src="libs/date.js"></script>
-	<script type='text/javascript' src='jquery.weekcalendar.js'></script>
 	<script type='text/javascript'><?php include "cal.php"; connectDB(); getSetupData(); echo provideVariables();?></script>
+	<script type='text/javascript' src='jquery.weekcalendar.js'></script>
 	<script type='text/javascript' src='platzkalender.js'></script>
 </head>
 
@@ -29,7 +31,7 @@
 			<input type="hidden" />
 			<ul>
 				<li>
-					<span>Datum: </span><span class="date_holder"></span> 
+					<label>Datum: </label><span class="date_holder"></span> 
 				</li>
 				<li>
 					<label for="start">Start: </label><select name="start"><option value="">Start</option></select>
@@ -68,7 +70,7 @@
 			<input type="hidden" />
 			<ul>
 				<li>
-					<span>Datum: </span><span class="date_holder"></span> 
+					<label>Datum: </label><span class="date_holder"></span> 
 				</li>
 				<li>
 					<label for="start">Start: </label><select name="start"><option value="">Start</option></select>
@@ -101,5 +103,10 @@
 			<a href="http://www.tennisklub-langen.de/traglufthalle/" target="_blank">Hinweise zur Buchung auf der TKL Seite</a>
 		</p>
 	</div>
+	<div class="leftrow">
+        <a href="/app.apk">Android App</a> | <a href="/pwa/">Web App</a> | <a href="https://www.tennisklub-langen.de/about/">Impressum</a> | <a href="https://www.tennisklub-langen.de/j/privacy">Datenschutz</a>
+	</div>
+</script>
+
 </body>
 </html>

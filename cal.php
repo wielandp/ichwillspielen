@@ -54,6 +54,9 @@ function getSetupData() {
 	}
 	mysqli_free_result($retv);
 
+	$_SESSION["vorname"] = $_GET['vorname'];
+	$_SESSION["nachname"] = $_GET['nachname'];
+
 	return true;
 }
 
@@ -132,11 +135,31 @@ function getPrice($wtag, $hour) {
 	return $setupData["price".((($wtag + 1) % 7) * 100 + $hour)];
 }
 
+function check_code($code, $typ) {
+    if ($typ == 0) {
+      if (!isLoggedIn() && strlen($code) > 0) {
+        if (strlen($code) < 6) {
+	      die("Ein Code ist immer 6 Zeichen lang. Zu wenig Zeichen");
+	    }
+        if (strlen($code) > 6) {
+	      die("Ein Code ist immer 6 Zeichen lang. Zu viele Zeichen");
+	    }
+        if (strstr($code, 'O') || strstr($code, 'I')) {
+	      die("Ein Code hat nur Kleinbuchstaben und Ziffern.");
+	    }
+	  }
+	  return strtolower($code);
+	}
+	return $code;
+}
+
 function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid) {
 	global $setupData, $connection;
 	getSetupData();
+	$telnumber = check_code($telnumber, $typ);
 	$telnumber2 = $telnumber;
 	$thisip = getRemoteIP();
+	$bem = "";
 
 	if (substr($start,0,10) > substr($setupData['maxdate'],0,10)
 	||	substr($start,0,10) < substr($setupData['mindate'],0,10)
@@ -149,9 +172,30 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
       die("Buchungen sind nur in der Saison möglich (Ende).");
 	}
 	if ($id == 0) {
+		$query = "SELECT firstname, lastname FROM custom WHERE start <= '$start' and end >= '$end' and uid = $uid";
+		$retv = mysqli_query($connection, $query);
+		if (!$retv) {
+			die('Error: ' . $connection->error);
+		}
+		if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
+			die("Buchung in diesem Zeitraum nicht möglich 1.");
+		}
+		$query = "SELECT firstname, lastname FROM weekly
+			WHERE day=WEEKDAY('$start')+1 and start <= right('$start',8) and end >= right('$end',8) and uid = $uid
+			  AND (typ = 2 or CAST('$start' as date) not in (select datum from holiday where datum = CAST('$start' as date)))";
+		$retv = mysqli_query($connection, $query);
+		if (!$retv) {
+			die('Error: ' . $connection->error);
+		}
+		if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
+			saveTransaction("Kollision2", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
+			die("Buchung in diesem Zeitraum nicht möglich 2.");
+		}
         if ($typ == 1 && strtotime($start)-time()>(60*60*2)) {
-            if (!isLoggedIn())
+            if (!isLoggedIn()) {
+				saveTransaction("Jzufrüh", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
                 die("Jugend-Buchungen können nur ab 2 Stunden vor Beginn eingetragen werden.");
+			}
         }
         if ($typ == 0 && strtotime($start)-time()>(60*60*24*7*4)) {
             if (!isLoggedIn())
@@ -166,6 +210,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
 				$telnumber2 = $row['text']."-".sprintf("%02d",$row['preis'])."-".sprintf("%03d",$row['lfdnr'])."-$telnumber";
 				$preis	= $row['preis'];
+				$bem	= $row['bem'];
 			} else {
 				$query = "INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (2, 1, '$thisip', '$telnumber')";
 				if (!mysqli_query($connection, $query)) {
@@ -193,8 +238,8 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 				die("Marke ungültig");
 			}
 		}
-		$query = "INSERT INTO custom (title, firstname, lastname, telnumber, body, start, end, typ, uid) 
-				  VALUES ('$title', '$firstname', '$lastname', '$telnumber2', '$body', '$start', '$end', $typ, $uid)";
+		$query = "INSERT INTO custom (title, firstname, lastname, telnumber, body, start, end, typ, uid, bem) 
+				  VALUES ('$title', '$firstname', '$lastname', '$telnumber2', '$body', '$start', '$end', $typ, $uid, '$bem')";
 	} else {
         if (strtotime($start)-time()<(60*60*24)) {
             if (!isLoggedIn())
@@ -205,7 +250,18 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 				  WHERE id=$id";
 	}
 	if (!$retv = mysqli_query($connection, $query)) {
-		die('Error: ' . $connection->error);
+		$connerr = $connection->error;
+		if ($id == 0) {
+			saveTransaction("BuchFail", $id, $title, $firstname, $lastname, $telnumber2, $connerror, $start, $end, $typ, $uid);
+			if ($typ == 0 && (strlen($telnumber) == 6 || !isLoggedIn())) {
+				$query = "UPDATE marke SET used=used-1
+						  WHERE code='$telnumber' and used=1";
+				if (!$retv = mysqli_query($connection, $query)) {
+					die('Error: ' . $connection->error);
+				}
+			}
+		}
+		die('Error2: ' . $connerr);
 	}
 	if ($id == 0) {
 		$id = $connection->insert_id;
@@ -255,7 +311,9 @@ function deleteId($id, $telnumber, $typ) {
             if (!isLoggedIn())
                 die("Buchungen können nur bis 24 Stunden vor Beginn geändert werden.");
         }
-		if (!isLoggedIn() && $telnumber != $telnumber2 && $telnumber != substr($telnumber2, 9, 10)) {
+		$telnumber = check_code($telnumber);
+		if (!isLoggedIn() && (strlen($telnumber) < 1 || ($telnumber != $telnumber2 && $telnumber != substr($telnumber2, -6)))) {
+			saveTransaction("Ung.Del", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 			die("Löschen nur mit Code möglich.");
 		}
 		$query = "UPDATE marke SET used=0, custom_id=NULL WHERE custom_id=$id";
@@ -303,7 +361,7 @@ function getEvents($start, $end) {
 	global $setupData, $connection;
 	getSetupData();
 	$arr=array();
-	
+
 	// Get all events in one big query
 	$queryevents = "
 		(SELECT id, 
@@ -317,7 +375,9 @@ function getEvents($start, $end) {
 	} else {
 	  $queryevents .= "
 				'' as firstname,
-				case lastname when 'Platzpflege' then lastname else '' end as lastname,
+				case lastname when 'Platzpflege' then lastname else
+					case typ when 2 then 'Abo' else 'Training' end
+				end as lastname,
 				'' as telnumber,
 				'' as body, ";
 	}
@@ -367,8 +427,8 @@ function getEvents($start, $end) {
 			'lastname'	=> $row['lastname'],
 			'telnumber'	=> $row['telnumber'],
 			'body'	    => $row['body'],
-			'start'     => date('c', strtotime($row['start'])),
-			'end'	    => date('c', strtotime($row['end'])),
+			'start'     => substr(date('c', strtotime($row['start'])),0,19),
+			'end'	    => substr(date('c', strtotime($row['end'])),0,19),
 			'typ'	    => (int)$row['typ'],
 			'userId'    => array((int)$row['uid']),
 			'readOnly'  => (boolean)$row['readonly']
@@ -466,6 +526,15 @@ function provideVariables() {
 				$ret .= "var s$idx = ".strtotime($val).";";
 		}
 	}
+	$ret .= "var \$vorname=\"".$_GET["vorname"]."\";";
+	$ret .= "var \$nachname=\"".$_GET["nachname"]."\";";
+	$ret .= "var \$marke=\"".$_GET["marke"]."\";";
+	$ret .= "var \$typ=\"".$_GET["typ"]."\";";
+
+	$dateTimeZoneBerlin = new DateTimeZone('Europe/Berlin');
+	$dateTimeBerlin = new DateTime("now", $dateTimeZoneBerlin);
+	$timeOffset = $dateTimeZoneBerlin->getOffset($dateTimeBerlin);
+	$ret .= "var clientOffset = new Date().getTimezoneOffset()*60;var tz_offset=".$timeOffset."+clientOffset;";
 
 	$arr = array();
 	$query = "SELECT * FROM preise ORDER BY tagstunde";
@@ -592,7 +661,7 @@ if (isset($_REQUEST['action'])) {
 			exit;
 		}
 		case 'get_events': {
-			$arr = getEvents(date('Y-m-d H:i:s',$_REQUEST['start']), date('Y-m-d H:i:s',$_REQUEST['end']));
+			$arr = getEvents(date('Y-m-d 00:00:00',$_REQUEST['start']+10*3600), date('Y-m-d 00:00:00',$_REQUEST['end']+10*3600));
 			echo '{"events":'.json_encode($arr).'}';
 			exit;
 		}		

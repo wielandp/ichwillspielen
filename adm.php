@@ -6,6 +6,8 @@
 <head>
 	<title>TKL Hallenbelegung Admininstration</title>
 
+	<link href="images/icon-4x.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+    <link rel="manifest" href="/manifestadm.json">
 	<link rel='stylesheet' type='text/css' href='reset.css' />
 	<link rel='stylesheet' type='text/css' href='libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
 	<link rel='stylesheet' type='text/css' href='jquery.weekcalendar.css' />

@@ -1291,9 +1291,9 @@
        * Draws a thin line which indicates the current time.
        */
       _drawCurrentHourLine: function() {
-        var d = new Date(),
-            options = this.options,
-            businessHours = options.businessHours;
+        var d = new Date(new Date().getTime() + tz_offset*1000),
+        options = this.options,
+        businessHours = options.businessHours;
 
         // first, we remove the old hourline if it exists
         $('.wc-hourline', this.element).remove();
