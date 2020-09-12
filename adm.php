@@ -6,6 +6,8 @@
 <head>
 	<title>TKL Hallenbelegung Admininstration</title>
 
+	<link href="images/icon-4x.ico" rel="shortcut icon" type="image/vnd.microsoft.icon">
+    <link rel="manifest" href="/manifestadm.json">
 	<link rel='stylesheet' type='text/css' href='reset.css' />
 	<link rel='stylesheet' type='text/css' href='libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
 	<link rel='stylesheet' type='text/css' href='jquery.weekcalendar.css' />
@@ -66,6 +68,7 @@
 						<option value="1">Freie Buchung Jugend</option>
 						<option value="2">Abo</option>
 						<option value="3">Training</option>
+						<option value="4">Ausfall</option>
 					</select>
 				</li>
 				<li>

@@ -138,11 +138,15 @@ $(document).ready(function() {
 			var startField = $dialogContent.find("select[name='start']").val(calEvent.start);
 			var endField = $dialogContent.find("select[name='end']").val(calEvent.end);
 			var firstnameField = $dialogContent.find("input[name='firstname']");
+			firstnameField.val($vorname);
 			var lastnameField = $dialogContent.find("input[name='lastname']");
+			lastnameField.val($nachname);
 			var telnumberField = $dialogContent.find("input[name='telnumber']");
+			telnumberField.val($marke);
 			//var titleField = $dialogContent.find("input[name='title']");
 			var bodyField = $dialogContent.find("textarea[name='body']");
 			var typField = $dialogContent.find("select[name='typ']").val(calEvent.typ);
+			typField.val($typ);
 			
 			$currentEvent = $event;
 
@@ -166,16 +170,54 @@ $(document).ready(function() {
 							//calEvent.title = titleField.val();
 							calEvent.firstname = firstnameField.val();
 							calEvent.lastname = lastnameField.val();
-							calEvent.telnumber = telnumberField.val();
+							calEvent.telnumber = jQuery.trim(telnumberField.val());
 							calEvent.body = bodyField.val();
 							calEvent.typ = (isNumber(typField.val())) ? typField.val() : 0;
-						  
+
+							if (calEvent.telnumber.indexOf("O") >= 0) {
+								alert("Sie haben im Code den Großbuchstaben O eingegeben. Das muss wahrscheinlich die Ziffer 0 sein.");
+								telnumberField.focus();
+								return;
+							}
+
+							if (calEvent.telnumber.indexOf("I") >= 0) {
+								alert("Sie haben im Code den Großbuchstaben I eingegeben. Das muss wahrscheinlich der Kleinbuchstabe L sein.");
+								telnumberField.focus();
+								return;
+							}
+
+							if (jQuery.trim(telnumberField.val()).length > 6) {
+								alert("Sie haben im Code mehr als 6 Zeichen eingegeben.");
+								telnumberField.focus();
+								return;
+							}
+
+							if (calEvent.telnumber.indexOf(" ") >= 0) {
+								alert("Sie haben im Code Leerzeichen eingegeben. Ein Code besteht nur aus Kleinbuchstaben und Ziffern.");
+								telnumberField.focus();
+								return;
+							}
+
+							if (calEvent.telnumber.indexOf("-") >= 0) {
+								alert("Sie haben im Code - eingegeben. Ein Code besteht nur aus Kleinbuchstaben und Ziffern.");
+								telnumberField.focus();
+								return;
+							}
+
+							if ((jQuery.trim(telnumberField.val()).length > 0) && (jQuery.trim(telnumberField.val()).length < 6)) {
+								alert("Sie haben im Code weniger als 6 Zeichen eingegeben.");
+								telnumberField.focus();
+								return;
+							}
+
 							// post to server
 							var action = "save";
-							if (calEvent.typ > 1) {
+							if (calEvent.typ > 3) {
+								action = "savefree";
+							}else if (calEvent.typ > 1) {
 								action = "savefixed";
 							}
-							$.post("cal.php?action="+action+"&id=0&start="+calEvent.start.getTime()/1000+"&end="+calEvent.end.getTime()/1000+"&firstname="+calEvent.firstname+"&lastname="+calEvent.lastname+"&telnumber="+calEvent.telnumber+"&body="+calEvent.body+"&typ="+calEvent.typ+"&uid="+calEvent.userId, function(data) {
+							$.post("cal.php?action="+action+"&id=0&start="+(calEvent.start.getTime()/1000-tz_offset)+"&end="+(calEvent.end.getTime()/1000-tz_offset)+"&firstname="+calEvent.firstname+"&lastname="+calEvent.lastname+"&telnumber="+calEvent.telnumber+"&body="+calEvent.body+"&typ="+calEvent.typ+"&uid="+calEvent.userId, function(data) {
 								if (isNumber(data)) {
 									calEvent.id = data;
 								} else if (data.substr(0, 7) == "Achtung") {
@@ -311,7 +353,11 @@ $(document).ready(function() {
 							if (calEvent.typ > 1) {
 								action = "savefixed";
 							}
-							$.post("cal.php?action="+action+"&id="+calEvent.id+"&start="+calEvent.start.getTime()/1000+"&end="+calEvent.end.getTime()/1000+"&firstname="+calEvent.firstname+"&lastname="+calEvent.lastname+"&body="+calEvent.body+"&typ="+calEvent.typ+"&uid="+calEvent.userId);
+							$.post("cal.php?action="+action+"&id="+calEvent.id+"&start="+calEvent.start.getTime()/1000+"&end="+calEvent.end.getTime()/1000+"&firstname="+calEvent.firstname+"&lastname="+calEvent.lastname+"&body="+calEvent.body+"&typ="+calEvent.typ+"&uid="+calEvent.userId, function(data) {
+								if (data.substr(0, 7) == "Achtung") {
+									alert(data);
+								}
+							});
 
 							$calendar.weekCalendar("updateEvent", calEvent);
 							$dialogContent.dialog("close");
