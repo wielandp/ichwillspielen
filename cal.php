@@ -201,20 +201,26 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			saveTransaction("Kollision2", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 			die("Buchung in diesem Zeitraum nicht möglich 2.");
 		}
-        if ($typ == 1 && strtotime($start)-time()>(60*60*2)) {
+        if ($typ == 1 && strlen($telnumber) != 6 && strtotime($start)-time()>(60*60*2)) {
             if (!isLoggedIn()) {
 				saveTransaction("Jzufrüh", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
                 die("Jugend-Buchungen können nur ab 2 Stunden vor Beginn eingetragen werden.");
 			}
         }
-        if ($typ == 1 && strtotime($start)-time()>(60*60*2)-30) {
+        if ($typ == 1 && strlen($telnumber) == 6 && strtotime($start)-time()>(60*60*3)) {
+            if (!isLoggedIn()) {
+				saveTransaction("J3zufrüh", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
+                die("3h-Jugend-Buchungen können nur ab 3 Stunden vor Beginn eingetragen werden.");
+			}
+        }
+        if ($typ == 1 && strlen($telnumber) != 6 && !isLoggedIn() && strtotime($start)-time()>(60*60*2)-30) {
 			sleep(strtotime($start)-time()-(60*60*2)+30);
 		}
         if ($typ == 0 && strtotime($start)-time()>(60*60*24*7*4)) {
             if (!isLoggedIn())
                 die("Einzel-Buchungen können nur ab 4 Wochen vor Beginn eingetragen werden.");
         }
-        if ($typ == 0 && (strlen($telnumber) == 6 || !isLoggedIn())) {
+        if (($typ == 0 || ($typ == 1 && strlen($telnumber) == 6)) && (strlen($telnumber) == 6 || !isLoggedIn())) {
 			$query = "SELECT *, WEEKDAY('$start') wtag, HOUR('$start') hour FROM marke WHERE code='$telnumber' and used=0";
 			$retv = mysqli_query($connection, $query);
 			if (!$retv) {
@@ -232,10 +238,22 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 				saveTransaction("Ungültig", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 				die("Marke unbekannt.");
 			}
+			if ($typ != 1 && $row['text'] === "3") {
+				if (!isLoggedIn()) {
+					saveTransaction("J3notJ", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
+					die("Mit 3h-Jugend-Codes können nur Freie-Jugend-Buchung gebucht werden.");
+				}
+			}
+			if ($typ == 1 && $row['text'] !== "3") {
+				if (!isLoggedIn()) {
+					saveTransaction("JkeinJ3", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
+					die("Code ist kein 3h-Jugend-Code. Bitte Buchung Erwachsene auswählen.");
+				}
+			}
 			$oprice = getPrice($row['wtag'], $row['hour']);
 #			$row['wtag'] = (($row['wtag'] + 1) % 7) * 100 + $row['hour'];
 #			die("preis der marke=".$preis." start=$start wtag=".$row['wtag']." oprice=$oprice");
-			if ($row['text'] !== "J" && $preis < $oprice) {
+			if ($row['text'] !== "J" && $row['text'] !== "3" && $preis < $oprice) {
 			  die("Wert der Marke ".$preis." EUR zu niedrig. Preis der Stunde $oprice EUR. Buchung nicht möglich!");
 			}
 			if ($preis > $oprice) {
@@ -280,7 +298,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 		$id = $connection->insert_id;
 		saveTransaction("Buchung", $id, $title, $firstname, $lastname, $telnumber2, $body, $start, $end, $typ, $uid);
 
-        if ($typ == 0 /*&& !isLoggedIn()*/) {
+        if ($typ == 0 || ($typ == 1 && strlen($telnumber) == 6)/*&& !isLoggedIn()*/) {
 			$query = "UPDATE marke SET custom_id=$id WHERE code='$telnumber' and used=1";
 			if (!$retv = mysqli_query($connection, $query) || $retv->affected_rows != 1) {
 				die('Error: ' . $connection->error);
