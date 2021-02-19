@@ -27,7 +27,7 @@ $query = "SELECT id, start, end , uid +1 \"Platz\", Typ, `firstname` , `lastname
 	substr( telnumber, 3, 2 ) \"Preis\", `body`, `bem` 
 FROM `custom` 
 WHERE `telnumber` LIKE '_-__-___%-______'
-  AND start > '2019-06-05'
+  AND start > '2020-06-05'
 ORDER BY START";
 
 $retv = mysqli_query($connection, $query);
