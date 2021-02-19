@@ -1,6 +1,6 @@
 <?php
-if($_SERVER['HTTP_ORIGIN'] == "http://192.168.178.65:4200") {
-  header("Access-Control-Allow-Origin: http://192.168.178.65:4200");		/* for angular local testserver */
+if($_SERVER['HTTP_ORIGIN'] == "http://192.168.188.23:4200") {
+  header("Access-Control-Allow-Origin: http://192.168.188.23:4200");		/* for angular local testserver */
 } else {
   header("Access-Control-Allow-Origin: https://tklhalle.de");		/* normal server */
 }
@@ -187,6 +187,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			die('Error: ' . $connection->error);
 		}
 		if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
+			saveTransaction("Kollision1", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 			die("Buchung in diesem Zeitraum nicht möglich 1.");
 		}
 		$query = "SELECT firstname, lastname FROM weekly
@@ -206,6 +207,9 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
                 die("Jugend-Buchungen können nur ab 2 Stunden vor Beginn eingetragen werden.");
 			}
         }
+        if ($typ == 1 && strtotime($start)-time()>(60*60*2)-30) {
+			sleep(strtotime($start)-time()-(60*60*2)+30);
+		}
         if ($typ == 0 && strtotime($start)-time()>(60*60*24*7*4)) {
             if (!isLoggedIn())
                 die("Einzel-Buchungen können nur ab 4 Wochen vor Beginn eingetragen werden.");
