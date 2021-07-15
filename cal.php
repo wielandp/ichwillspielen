@@ -166,6 +166,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 	$telnumber2 = $telnumber;
 	$thisip = getRemoteIP();
 	$bem = "";
+	$maxdate2 = $setupData['maxdate2'];
 
 	if (substr($start,0,10) > substr($setupData['maxdate'],0,10)
 	||	substr($start,0,10) < substr($setupData['mindate'],0,10)
@@ -192,7 +193,8 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 		}
 		$query = "SELECT firstname, lastname FROM weekly
 			WHERE day=WEEKDAY('$start')+1 and start <= right('$start',8) and end >= right('$end',8) and uid = $uid
-			  AND (typ = 2 or CAST('$start' as date) not in (select datum from holiday where datum = CAST('$start' as date)))";
+			  AND (typ = 2 or CAST('$start' as date) not in (select datum from holiday where datum = CAST('$start' as date)))
+			  AND ADDDATE('$start', day-WEEKDAY('$start')-1) < '$maxdate2'";
 		$retv = mysqli_query($connection, $query);
 		if (!$retv) {
 			die('Error: ' . $connection->error);
@@ -388,7 +390,7 @@ function deleteId($id, $telnumber, $typ) {
             if (!isLoggedIn())
                 die("Buchungen können nur bis 24 Stunden vor Beginn geändert werden.");
         }
-		$telnumber = check_code($telnumber);
+		$telnumber = check_code($telnumber, $typ);
 		if (!isLoggedIn() && (strlen($telnumber) < 1 || ($telnumber != $telnumber2 && $telnumber != substr($telnumber2, -6)))) {
 			saveTransaction("Ung.Del", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 			die("Löschen nur mit Code möglich.");
@@ -438,6 +440,7 @@ function getEvents($start, $end) {
 	global $setupData, $connection;
 	getSetupData();
 	$arr=array();
+	$maxdate2 = $setupData['maxdate2'];
 
 	// Get all events in one big query
 	$queryevents = "
@@ -466,7 +469,9 @@ function getEvents($start, $end) {
 				1 as readonly
 				FROM weekly 
 				WHERE day>=WEEKDAY('$start')+1 AND day<=WEEKDAY('$end' - INTERVAL 1 SECOND)+1
-				  AND (typ = 2 or ADDDATE('$start', day-WEEKDAY('$start')-1) not in (select datum from holiday where datum = ADDDATE('$start', day-WEEKDAY('$start')-1))))
+				  AND (typ = 2 or ADDDATE('$start', day-WEEKDAY('$start')-1) not in (select datum from holiday where datum = ADDDATE('$start', day-WEEKDAY('$start')-1)))
+				  AND ADDDATE('$start', day-WEEKDAY('$start')-1) < '$maxdate2'
+		)
 		UNION
 		(SELECT id, 
 				title, 
@@ -688,7 +693,6 @@ function logout() {
 
 // AJAX requests
 if (isset($_REQUEST['action'])) {
-	
 	connectDB();
 	date_default_timezone_set('Europe/Berlin');
 
@@ -764,7 +768,7 @@ if (isset($_REQUEST['action'])) {
 
 			echo json_encode($free);
 			exit;
-		}		
+		}
 		case 'getsetupdata': {
 			getSetupData();
 			echo provideVariables();

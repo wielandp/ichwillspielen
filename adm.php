@@ -13,13 +13,16 @@
 	<link rel='stylesheet' type='text/css' href='jquery.weekcalendar.css' />
 	<link rel='stylesheet' type='text/css' href='platzkalender.css' />
 	<link rel='stylesheet' type='text/css' href='skins/gcalendar.css' />
-	<link rel='stylesheet' type='text/css' href='libs/DataTables-1.9.4/media/css/demo_table.css' />
+	<!-- link rel='stylesheet' type='text/css' href='libs/DataTables-1.9.4/media/css/demo_table.css' / -->
+	<link rel='stylesheet' type='text/css' href='libs/DataTables-1.10.25/css/dataTables.dataTables.min.css' />
+	<link rel='stylesheet' type='text/css' href='libs/css/datatables.css' />
 
 	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
 	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js'></script>
 	<script type="text/javascript" src="libs/date.js"></script>
 	<script type='text/javascript' src='jquery.weekcalendar.js'></script>
-	<script type="text/javascript" src="libs/DataTables-1.9.4/media/js/jquery.dataTables.min.js"></script>
+	<!-- script type="text/javascript" src="libs/DataTables-1.9.4/media/js/jquery.dataTables.min.js"></script -->
+	<script type="text/javascript" src="libs/DataTables-1.10.25/js/jquery.dataTables.min.js"></script>
 	<script type='text/javascript'><?php include "cal.php"; connectDB(); getSetupData(); echo provideVariables();?></script>
 	<script type='text/javascript' src='platzkalender.js'></script>
 	<script type='text/javascript' src='setup.js'></script>
