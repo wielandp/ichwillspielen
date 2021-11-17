@@ -192,7 +192,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			die("Buchung in diesem Zeitraum nicht möglich 1.");
 		}
 		$query = "SELECT firstname, lastname FROM weekly
-			WHERE day=WEEKDAY('$start')+1 and start <= right('$start',8) and end >= right('$end',8) and uid = $uid
+			WHERE day=WEEKDAY('$start')+1 and start <= right('$start',8) and end >= TIMEDIFF('$end', concat(left('$start',10),' 00:00:00')) and uid = $uid
 			  AND (typ = 2 or CAST('$start' as date) not in (select datum from holiday where datum = CAST('$start' as date)))
 			  AND ADDDATE('$start', day-WEEKDAY('$start')-1) < '$maxdate2'";
 		$retv = mysqli_query($connection, $query);
