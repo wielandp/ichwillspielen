@@ -426,13 +426,22 @@ $(document).ready(function() {
 	* form for editing based on the calendar event being edited
 	*/
 	function setupStartAndEndTimeFields($startTimeField, $endTimeField, calEvent, timeslotTimes) {
-
+		var regTime = new RegExp("^[-+ \(\):0-9a-zA-Zä]+$");
 		$startTimeField.empty();
 		$endTimeField.empty();
 
 		for (var i = 0; i < timeslotTimes.length; i++) {
 			var startTime = timeslotTimes[i].start;
 			var endTime = timeslotTimes[i].end;
+
+			if (!regTime.test(endTime)) {
+				endTime = "xx:xx";
+			}
+			if (!regTime.test(startTime)) {
+				startTime = "xx:xx";
+			}
+
+
 			var startSelected = "";
 			if (startTime.getTime() === calEvent.start.getTime()) {
 				startSelected = "selected=\"selected\"";
