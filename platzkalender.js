@@ -426,7 +426,8 @@ $(document).ready(function() {
 	* form for editing based on the calendar event being edited
 	*/
 	function setupStartAndEndTimeFields($startTimeField, $endTimeField, calEvent, timeslotTimes) {
-		var regTime = new RegExp("^[-+ \(\):0-9a-zA-Zä]+$");
+		var regDateTime = new RegExp("^[-+ \(\):0-9a-zA-Zä]+$");
+		var regTime = new RegExp("^[:0-9]+$");
 		$startTimeField.empty();
 		$endTimeField.empty();
 
@@ -434,11 +435,12 @@ $(document).ready(function() {
 			var startTime = timeslotTimes[i].start;
 			var endTime = timeslotTimes[i].end;
 
-			if (!regTime.test(endTime)) {
-				endTime = "xx:xx";
-			}
-			if (!regTime.test(startTime)) {
-				startTime = "xx:xx";
+			if (!regDateTime.test(endTime) or
+				!regDateTime.test(startTime) or
+				!regTime.test(timeslotTimes[i].startFormatted) or
+				!regTime.test(timeslotTimes[i].endFormatted)
+			) {
+				endTime = "xx:xx";		// causes error soon
 			}
 
 
