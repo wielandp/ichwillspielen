@@ -435,9 +435,9 @@ $(document).ready(function() {
 			var startTime = timeslotTimes[i].start;
 			var endTime = timeslotTimes[i].end;
 
-			if (!regDateTime.test(endTime) or
-				!regDateTime.test(startTime) or
-				!regTime.test(timeslotTimes[i].startFormatted) or
+			if (!regDateTime.test(endTime) ||
+				!regDateTime.test(startTime) ||
+				!regTime.test(timeslotTimes[i].startFormatted) ||
 				!regTime.test(timeslotTimes[i].endFormatted)
 			) {
 				endTime = "xx:xx";		// causes error soon
