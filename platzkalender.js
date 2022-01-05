@@ -439,12 +439,11 @@ $(document).ready(function() {
 
 			if (!regDateTime.test(endTime) ||
 				!regDateTime.test(startTime) ||
-				!regTime.test(startFormatted) ||
-				!regTime.test(endFormatted)
+				!regTime.test(startFormatted)
 			) {
 				endTime = "xx:xx";		// causes error soon
 			}
-
+			if (!regTime.test(endFormatted)) { endFormatted = "xx:xx"; }		// causes error soon
 
 			var startSelected = "";
 			if (startTime.getTime() === calEvent.start.getTime()) {
