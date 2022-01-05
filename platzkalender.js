@@ -434,11 +434,13 @@ $(document).ready(function() {
 		for (var i = 0; i < timeslotTimes.length; i++) {
 			var startTime = timeslotTimes[i].start;
 			var endTime = timeslotTimes[i].end;
+			var startFormatted = timeslotTimes[i].startFormatted;
+			var endFormatted = timeslotTimes[i].endFormatted;
 
 			if (!regDateTime.test(endTime) ||
 				!regDateTime.test(startTime) ||
-				!regTime.test(timeslotTimes[i].startFormatted) ||
-				!regTime.test(timeslotTimes[i].endFormatted)
+				!regTime.test(startFormatted) ||
+				!regTime.test(endFormatted)
 			) {
 				endTime = "xx:xx";		// causes error soon
 			}
@@ -452,9 +454,9 @@ $(document).ready(function() {
 			if (endTime.getTime() === calEvent.end.getTime()) {
 				endSelected = "selected=\"selected\"";
 			}
-			$startTimeField.append("<option value=\"" + startTime + "\" " + startSelected + ">" + timeslotTimes[i].startFormatted + "</option>");
+			$startTimeField.append("<option value=\"" + startTime + "\" " + startSelected + ">" + startFormatted + "</option>");
 			if (admin || endSelected != "") {
-				$endTimeField.append("<option value=\"" + endTime + "\" " + endSelected + ">" + timeslotTimes[i].endFormatted + "</option>");
+				$endTimeField.append("<option value=\"" + endTime + "\" " + endSelected + ">" + endFormatted + "</option>");
 			}
 
 			$timestampsOfOptions.start[timeslotTimes[i].startFormatted] = startTime.getTime();
