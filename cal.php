@@ -665,8 +665,10 @@ function login() {
 				echo 'Username or password wrong.';
 				logout();
 
-				$query = "INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (1, 1, '$thisip', '".$_REQUEST['uid']."/".md5($_REQUEST['pwd'])."')";
-				if (!mysqli_query($connection, $query)) {
+				$query = $connection->prepare("INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (1, 1, '$thisip', ?)");
+				$uidpwd = $_REQUEST['uid']."/".md5($_REQUEST['pwd']);
+				$query->bind_param("s", $uidpwd); // "s" bedeutet, dass als Zeichenkette gebunden
+				if (!$query->execute()) {
 					die('Error: ' . $connection->error . "\n" . $query);
 				}
 			}
