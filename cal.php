@@ -646,8 +646,12 @@ function login() {
 
 	if (!isset($_SESSION['SID'])) {
 		if (isset($_REQUEST['uid']) && isset($_REQUEST['pwd'])) {
-			$query = "SELECT * FROM login WHERE name='".$_REQUEST['uid']."' and pwd='".md5($_REQUEST['pwd'])."'";
-			$retv = mysqli_query($connection, $query);
+			$query = $connection->prepare("SELECT * FROM login WHERE name=? and pwd=?");
+			$uid = $_REQUEST['uid'];
+			$pwd = md5($_REQUEST['pwd']);
+			$query->bind_param("ss", $uid, $pwd); // "s" bedeutet, dass als Zeichenkette gebunden
+			$query->execute();
+			$retv = $query->get_result();
 			if (!$retv) {
 				die('Error: ' . $connection->error);
 			}
