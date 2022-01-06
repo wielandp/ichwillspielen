@@ -652,8 +652,10 @@ function login() {
 				die('Error: ' . $connection->error);
 			}
 			if ($row = mysqli_fetch_array($retv, MYSQLI_ASSOC)) {
-				$query = "INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (1, 0, '$thisip', '".$_REQUEST['uid']."/')";
-				if (!mysqli_query($connection, $query)) {
+				$query = $connection->prepare("INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (1, 0, '$thisip', ?)");
+				$uidpwd = $_REQUEST['uid']."/";
+				$query->bind_param("s", $uidpwd); // "s" bedeutet, dass als Zeichenkette gebunden
+				if (!$query->execute()) {
 					die('Error: ' . $connection->error . "\n" . $query);
 				}
 
