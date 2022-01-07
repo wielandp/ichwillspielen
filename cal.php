@@ -363,14 +363,16 @@ function saveFixedEntry($id, $title, $firstname, $lastname, $telnumber, $body, $
 	global $connection;
 	if (!isLoggedIn()) die('Nicht angemeldet.');
 	if ($id == 0) {
-		$query = "INSERT INTO weekly (title, firstname, lastname, telnumber, body, day, start, end, typ, uid) 
-				  VALUES ('$title', '$firstname', '$lastname', '$telnumber', '$body', '$day', '$start', '$end', $typ, $uid)";
+		$query = $connection->prepare("INSERT INTO weekly (title, firstname, lastname, telnumber, body, day, start, end, typ, uid)
+				  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		$query->bind_param("ssssssssii", $title, $firstname, $lastname, $telnumber, $body, $day, $start, $end, $typ, $uid);
 	} else {
-		$query = "UPDATE weekly 
-				  SET title='$title', firstname='$firstname', lastname='$lastname', telnumber='$telnumber', body='$body', day='$day', start='$start', end='$end', typ=$typ, uid=$uid 
-				  WHERE id=$id";
+		$query = $connection->prepare("UPDATE weekly
+				  SET title=?, firstname=?, lastname=?, telnumber=?, body=?, day=?, start=?, end=?, typ=?, uid=? WHERE id=?");
+		$query->bind_param("ssssssssiii", $title, $firstname, $lastname, $telnumber, $body, $day, $start, $end, $typ, $uid, $id);
 	}
-	if (!$retv = mysqli_query($connection, $query)) {
+	$query->execute();
+	if (!$retv = $query->get_result()) {
 		die('Error: ' . $connection->error . " query: $query");
 	}
 	if ($id == 0)
