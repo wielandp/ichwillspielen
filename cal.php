@@ -330,18 +330,21 @@ function saveEntryFree($id, $title, $firstname, $lastname, $telnumber, $body, $s
       die("Buchungen sind nur in der Saison möglich (Ende).");
 	}
 	if ($id == 0) {
-		$query = "INSERT INTO ausfall (title, firstname, lastname, telnumber, body, start, end, typ, uid) 
-				  VALUES ('$title', '$firstname', '$lastname', '$telnumber2', '$body', '$start', '$end', $typ, $uid)";
+		$query = $connection->prepare("INSERT INTO ausfall (title, firstname, lastname, telnumber, body, start, end, typ, uid)
+				  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		$query->bind_param("sssssssii", $title, $firstname, $lastname, $telnumber2, $body, $start, $end, $typ, $uid);
 	} else {
         if (strtotime($start)-time()<(60*60*24)) {
             if (!isLoggedIn())
                 die("Buchungen können nur bis 24 Stunden vor Beginn geändert werden.");
         }
-		$query = "UPDATE ausfall
-				  SET title='$title', firstname='$firstname', lastname='$lastname', body='$body', start='$start', end='$end', typ=$typ, uid=$uid 
-				  WHERE id=$id";
+		$query = $connection->prepare("UPDATE ausfall
+				  SET title=?, firstname=?, lastname=?, body=?, start=?, end=?, typ=?, uid=? 
+				  WHERE id=?");
+		$query->bind_param("ssssssiii", $title, $firstname, $lastname, $body, $start, $end, $typ, $uid, $id);
 	}
-	if (!$retv = mysqli_query($connection, $query)) {
+	$query->execute();
+	if (!$retv = $query->get_result()) {
 		$connerr = $connection->error;
 		if ($id == 0) {
 			saveTransaction("BuchFreeFail", $id, $title, $firstname, $lastname, $telnumber2, $connerror, $start, $end, $typ, $uid);
