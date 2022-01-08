@@ -287,9 +287,9 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 		if ($id == 0) {
 			saveTransaction("BuchFail", $id, $title, $firstname, $lastname, $telnumber2, $connerror, $start, $end, $typ, $uid);
 			if ($typ == 0 && (strlen($telnumber) == 6 || !isLoggedIn())) {
-				$query = "UPDATE marke SET used=used-1
-						  WHERE code='$telnumber' and used=1";
-				if (!$retv = mysqli_query($connection, $query)) {
+				$query = $connection->prepare("UPDATE marke SET used=used-1 WHERE code=? and used=1");
+				$query->bind_param("s", $telnumber);
+				if (!$retv = $query->get_result()) {
 					die('Error: ' . $connection->error);
 				}
 			}
