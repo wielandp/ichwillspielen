@@ -301,8 +301,10 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 		saveTransaction("Buchung", $id, $title, $firstname, $lastname, $telnumber2, $body, $start, $end, $typ, $uid);
 
         if ($typ == 0 || ($typ == 1 && strlen($telnumber) == 6)/*&& !isLoggedIn()*/) {
-			$query = "UPDATE marke SET custom_id=$id WHERE code='$telnumber' and used=1";
-			if (!$retv = mysqli_query($connection, $query) || $retv->affected_rows != 1) {
+			$query = $connection->prepare("UPDATE marke SET custom_id=? WHERE code=? and used=1");
+			$query->bind_param("is", $id, $telnumber);
+			$query->execute();
+			if (!$retv = $query->get_result() || $retv->affected_rows != 1) {
 				die('Error: ' . $connection->error);
 			}
 		}
