@@ -261,9 +261,10 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			if ($preis > $oprice) {
 			  echo "Achtung: Wert der Marke ".$preis." EUR Preis der Stunde $oprice EUR\n";
 			}
-			$query = "UPDATE marke SET used=used+1
-					  WHERE code='$telnumber' and used=0";
-			if (!$retv = mysqli_query($connection, $query)) {
+			$connection->prepare("UPDATE marke SET used=used+1 WHERE code=? and used=0");
+			$query->bind_param("s", $telnumber);
+			$query->execute();
+			if (!$retv = $query->get_result()) {
 				die('Error: ' . $connection->error);
 			}
 			$rows = $connection->affected_rows;
