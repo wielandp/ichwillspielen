@@ -271,18 +271,20 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 				die("Marke ungültig");
 			}
 		}
-		$query = "INSERT INTO custom (title, firstname, lastname, telnumber, body, start, end, typ, uid, bem) 
-				  VALUES ('$title', '$firstname', '$lastname', '$telnumber2', '$body', '$start', '$end', $typ, $uid, '$bem')";
+		$query = $connection->prepare("INSERT INTO custom (title, firstname, lastname, telnumber, body, start, end, typ, uid, bem)
+				  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		$query->bind_param("sssssssiis", $title, $firstname, $lastname, $telnumber2, $body, $start, $end, $typ, $uid, $bem);
 	} else {
         if (strtotime($start)-time()<(60*60*24)) {
             if (!isLoggedIn())
                 die("Buchungen können nur bis 24 Stunden vor Beginn geändert werden.");
         }
-		$query = "UPDATE custom 
-				  SET title='$title', firstname='$firstname', lastname='$lastname', body='$body', start='$start', end='$end', typ=$typ, uid=$uid 
-				  WHERE id=$id";
+		$query = $connection->prepare("UPDATE custom
+				  SET title=?, firstname=?, lastname=?, body=?, start=?, end=?, typ=?, uid=? WHERE id=?");
+		$query->bind_param("ssssssiii", $title, $firstname, $lastname, $body, $start, $end, $typ, $uid, $id);
 	}
-	if (!$retv = mysqli_query($connection, $query)) {
+	$query->execute();
+	if (!$retv = $query->get_result()) {
 		$connerr = $connection->error;
 		if ($id == 0) {
 			saveTransaction("BuchFail", $id, $title, $firstname, $lastname, $telnumber2, $connerror, $start, $end, $typ, $uid);
