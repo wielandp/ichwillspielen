@@ -261,11 +261,13 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			if ($preis > $oprice) {
 			  echo "Achtung: Wert der Marke ".$preis." EUR Preis der Stunde $oprice EUR\n";
 			}
-			$connection->prepare("UPDATE marke SET used=used+1 WHERE code=? and used=0");
+#			die("vor update marke telnumber=$telnumber"); #!!!
+			$query = $connection->prepare("UPDATE marke SET used=used+1 WHERE code=? and used=0");
+#			if ($connection->errno) { die('Error: ' . $connection->errno . ' ' . $connection->error); }
 			$query->bind_param("s", $telnumber);
 			$query->execute();
-			if (!$retv = $query->get_result()) {
-				die('Error: ' . $connection->error);
+			if ($connection->errno) {
+				die('Errorx: ' . $connection->errno . ' ' . $connection->error);
 			}
 			$rows = $connection->affected_rows;
 			if ($rows != 1) {
@@ -285,15 +287,16 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 		$query->bind_param("ssssssiii", $title, $firstname, $lastname, $body, $start, $end, $typ, $uid, $id);
 	}
 	$query->execute();
-	if (!$retv = $query->get_result()) {
+	if ($connection->errno) {
 		$connerr = $connection->error;
 		if ($id == 0) {
 			saveTransaction("BuchFail", $id, $title, $firstname, $lastname, $telnumber2, $connerror, $start, $end, $typ, $uid);
 			if ($typ == 0 && (strlen($telnumber) == 6 || !isLoggedIn())) {
 				$query = $connection->prepare("UPDATE marke SET used=used-1 WHERE code=? and used=1");
 				$query->bind_param("s", $telnumber);
-				if (!$retv = $query->get_result()) {
-					die('Error: ' . $connection->error);
+				$query->execute();
+				if ($connection->errno) {
+					die('Errory: ' . $connection->error);
 				}
 			}
 		}
