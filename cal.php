@@ -714,7 +714,7 @@ function isLoggedIn() {
 
 function logout() {
 	unset($_SESSION['SID']);
-	setcookie("PHPSESSID","",time()-3600,"/");
+	setcookie("PHPSESSID","",time()-3600,"/", "", true, true);
 	session_destroy();
 }
 
