@@ -129,9 +129,11 @@ function saveTransaction($art, $id, $title, $firstname, $lastname, $telnumber, $
 	} else {
 	  $lid = 0;
 	}
-	$query = "INSERT INTO savetransaction (action, actiondate, ipaddr, title, firstname, lastname, telnumber, start, end, typ, uid, lid)
-			  VALUES ('$art', NOW(), '$thisip', '$title', '$firstname', '$lastname', '$telnumber', '$start', '$end', $typ, $uid, $lid)";
-	if (!mysqli_query($connection, $query)) {
+	$query = $connection->prepare("INSERT INTO savetransaction (action, actiondate, ipaddr, title, firstname, lastname, telnumber, start, end, typ, uid, lid)
+			  VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	$query->bind_param("ssssssssiii", $art, $thisip, $title, $firstname, $lastname, $telnumber, $start, $end, $typ, $uid, $lid);
+	$query->execute();
+	if ($connection->errno) {
 		die('Error: ' . $connection->error . "\n" . $query);
 	}
 }
