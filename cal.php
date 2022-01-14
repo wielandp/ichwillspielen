@@ -233,8 +233,10 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 				$preis	= $row['preis'];
 				$bem	= $row['bem'];
 			} else {
-				$query = "INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (2, 1, '$thisip', '$telnumber')";
-				if (!mysqli_query($connection, $query)) {
+				$query = $connection->prepare("INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (2, 1, ?, ?)");
+				$query->bind_param("ss", $thisip, $telnumber);
+				$query->execute();
+				if ($connection->errno) {
 					die('Error: ' . $connection->error . "\n" . $query);
 				}
 				saveTransaction("Ungültig", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
