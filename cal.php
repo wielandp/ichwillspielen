@@ -223,8 +223,10 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
                 die("Einzel-Buchungen können nur ab 4 Wochen vor Beginn eingetragen werden.");
         }
         if (($typ == 0 || ($typ == 1 && strlen($telnumber) == 6)) && (strlen($telnumber) == 6 || !isLoggedIn())) {
-			$query = "SELECT *, WEEKDAY('$start') wtag, HOUR('$start') hour FROM marke WHERE code='$telnumber' and used=0";
-			$retv = mysqli_query($connection, $query);
+			$query = $connection->prepare("SELECT *, WEEKDAY(?) wtag, HOUR(?) hour FROM marke WHERE code=? and used=0");
+			$query->bind_param("sss", $start, $start, $telnumber);
+			$query->execute();
+			$retv = $query->get_result();
 			if (!$retv) {
 				die('Error: ' . $connection->error);
 			}
