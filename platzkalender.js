@@ -453,7 +453,7 @@ $(document).ready(function() {
 			}
 			$startTimeField.append("<option value=\"" + startTime + "\" " + startSelected + ">" + startFormatted + "</option>");
 			if (admin || endSelected != "") {
-				$endTimeField.append("<option value=\"" + endTime + "\" " + endSelected + ">" + endFormatted.htmlEscape() + "</option>");
+				$endTimeField.append("<option value=\"" + endTime.htmlEscape() + "\" " + endSelected + ">" + endFormatted.htmlEscape() + "</option>");
 			}
 			$timestampsOfOptions.start[timeslotTimes[i].startFormatted] = startTime.getTime();
 			$timestampsOfOptions.end[timeslotTimes[i].endFormatted] = endTime.getTime();
