@@ -1,5 +1,13 @@
 var admin = false;
 
+String.prototype.htmlEscape = function(){
+    var span = document.createElement('span');
+    var txt =  document.createTextNode('');
+    span.appendChild(txt);
+    txt.data = this;
+    return span.innerHTML;
+};
+
 $(document).ready(function() {
 
 	var $calendar = $('#calendar');
@@ -426,8 +434,6 @@ $(document).ready(function() {
 	* form for editing based on the calendar event being edited
 	*/
 	function setupStartAndEndTimeFields($startTimeField, $endTimeField, calEvent, timeslotTimes) {
-		var regDateTime = new RegExp("^[-+ \(\):0-9a-zA-Zä]+$");
-		var regTime = new RegExp("^[:0-9]+$");
 		$startTimeField.empty();
 		$endTimeField.empty();
 
@@ -436,14 +442,6 @@ $(document).ready(function() {
 			var endTime = timeslotTimes[i].end;
 			var startFormatted = timeslotTimes[i].startFormatted;
 			var endFormatted = timeslotTimes[i].endFormatted;
-
-			if (!regDateTime.test(endTime) ||
-				!regDateTime.test(startTime) ||
-				!regTime.test(startFormatted)
-			) {
-				endTime = "xx:xx";		// causes error soon
-			}
-			if (!regTime.test(endFormatted)) { endFormatted = "xx:xx"; }		// causes error soon
 
 			var startSelected = "";
 			if (startTime.getTime() === calEvent.start.getTime()) {
@@ -455,9 +453,8 @@ $(document).ready(function() {
 			}
 			$startTimeField.append("<option value=\"" + startTime + "\" " + startSelected + ">" + startFormatted + "</option>");
 			if (admin || endSelected != "") {
-				$endTimeField.append("<option value=\"" + endTime + "\" " + endSelected + ">" + endFormatted + "</option>");
+				$endTimeField.append("<option value=\"" + endTime + "\" " + endSelected + ">" + endFormatted.htmlEscape() + "</option>");
 			}
-
 			$timestampsOfOptions.start[timeslotTimes[i].startFormatted] = startTime.getTime();
 			$timestampsOfOptions.end[timeslotTimes[i].endFormatted] = endTime.getTime();
 
