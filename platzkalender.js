@@ -451,7 +451,7 @@ $(document).ready(function() {
 			if (endTime.getTime() === calEvent.end.getTime()) {
 				endSelected = "selected=\"selected\"";
 			}
-			$startTimeField.append("<option value=\"" + startTime + "\" " + startSelected + ">" + startFormatted + "</option>");
+			$startTimeField.append("<option value=\"" + startTime.htmlEscape() + "\" " + startSelected + ">" + startFormatted.htmlEscape() + "</option>");
 			if (admin || endSelected != "") {
 				$endTimeField.append("<option value=\"" + endTime.htmlEscape() + "\" " + endSelected + ">" + endFormatted.htmlEscape() + "</option>");
 			}
