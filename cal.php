@@ -778,7 +778,7 @@ if (isset($_REQUEST['action'])) {
 			exit;
 		}
 		case 'delete': {
-			echo deleteId((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0), (isset($_REQUEST['telnumber'])?$connection->real_escape_string($_REQUEST['telnumber']):''), (isset($_REQUEST['typ'])?(int)$connection->real_escape_string($_REQUEST['typ']):0));
+			echo htmlspecialchars(deleteId((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0), (isset($_REQUEST['telnumber'])?$connection->real_escape_string($_REQUEST['telnumber']):''), (isset($_REQUEST['typ'])?(int)$connection->real_escape_string($_REQUEST['typ']):0)));
 			exit;
 		}
 		case 'get_events': {
