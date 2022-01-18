@@ -725,7 +725,7 @@ if (isset($_REQUEST['action'])) {
 
 	switch($_REQUEST['action']) {
 		case 'save': {
-			echo saveEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
+			echo htmlspecialchars(saveEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
 						 (isset($_REQUEST['title'])?$connection->real_escape_string($_REQUEST['title']):''),
 						 (isset($_REQUEST['firstname'])?$connection->real_escape_string($_REQUEST['firstname']):''),
 						 (isset($_REQUEST['lastname'])?$connection->real_escape_string($_REQUEST['lastname']):''),
@@ -734,11 +734,11 @@ if (isset($_REQUEST['action'])) {
 						 date('Y-m-d H:i:s',(int)$_REQUEST['start']),
 						 date('Y-m-d H:i:s',(int)$_REQUEST['end']),
 						 (isset($_REQUEST['typ'])?(int)$_REQUEST['typ']:0),
-						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0));
+						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0)));
 			exit;
 		}
 		case 'savefree': {
-			echo saveEntryFree((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
+			echo htmlspecialchars(saveEntryFree((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
 						 (isset($_REQUEST['title'])?$connection->real_escape_string($_REQUEST['title']):''),
 						 (isset($_REQUEST['firstname'])?$connection->real_escape_string($_REQUEST['firstname']):''),
 						 (isset($_REQUEST['lastname'])?$connection->real_escape_string($_REQUEST['lastname']):''),
@@ -747,11 +747,11 @@ if (isset($_REQUEST['action'])) {
 						 date('Y-m-d H:i:s',(int)$_REQUEST['start']),
 						 date('Y-m-d H:i:s',(int)$_REQUEST['end']),
 						 (isset($_REQUEST['typ'])?(int)$_REQUEST['typ']:0),
-						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0));
+						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0)));
 			exit;
 		}
 		case 'savem': {
-			echo saveEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
+			echo htmlspecialchars(saveEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
 						 (isset($_REQUEST['title'])?$connection->real_escape_string($_REQUEST['title']):''),
 						 (isset($_REQUEST['firstname'])?$connection->real_escape_string($_REQUEST['firstname']):''),
 						 (isset($_REQUEST['lastname'])?$connection->real_escape_string($_REQUEST['lastname']):''),
@@ -760,11 +760,11 @@ if (isset($_REQUEST['action'])) {
 						 date('Y-m-d H:i:s',(int)$_REQUEST['start']),
 						 date('Y-m-d H:i:s',(int)$_REQUEST['end']),
 						 0,
-						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0));
+						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0)));
 			exit;
 		}
 		case 'savefixed': {
-			echo saveFixedEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
+			echo htmlspecialchars(saveFixedEntry((isset($_REQUEST['id'])?(int)$_REQUEST['id']:0),
 						 (isset($_REQUEST['title'])?$connection->real_escape_string($_REQUEST['title']):''),
 						 (isset($_REQUEST['firstname'])?$connection->real_escape_string($_REQUEST['firstname']):''),
 						 (isset($_REQUEST['lastname'])?$connection->real_escape_string($_REQUEST['lastname']):''),
@@ -774,7 +774,7 @@ if (isset($_REQUEST['action'])) {
 						 date('Y-m-d H:i:s',(int)$_REQUEST['start']),
 						 date('Y-m-d H:i:s',(int)$_REQUEST['end']),
 						 (isset($_REQUEST['typ'])?(int)$_REQUEST['typ']:0),
-						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0));
+						 (isset($_REQUEST['uid'])?(int)$_REQUEST['uid']:0)));
 			exit;
 		}
 		case 'delete': {
