@@ -1,10 +1,10 @@
 var admin = false;
 
-String.prototype.htmlEscape = function(){
+function htmlEscape(s){
     var span = document.createElement('span');
     var txt =  document.createTextNode('');
     span.appendChild(txt);
-    txt.data = this;
+    txt.data = s;
     return span.innerHTML;
 };
 
@@ -451,9 +451,9 @@ $(document).ready(function() {
 			if (endTime.getTime() === calEvent.end.getTime()) {
 				endSelected = "selected=\"selected\"";
 			}
-			$startTimeField.append("<option value=\"" + startTime.htmlEscape() + "\" " + startSelected + ">" + startFormatted.htmlEscape() + "</option>");
+			$startTimeField.append("<option value=\"" + htmlEscape(startTime) + "\" " + startSelected + ">" + htmlEscape(startFormatted) + "</option>");
 			if (admin || endSelected != "") {
-				$endTimeField.append("<option value=\"" + endTime.htmlEscape() + "\" " + endSelected + ">" + endFormatted.htmlEscape() + "</option>");
+				$endTimeField.append("<option value=\"" + htmlEscape(endTime) + "\" " + endSelected + ">" + htmlEscape(endFormatted) + "</option>");
 			}
 			$timestampsOfOptions.start[timeslotTimes[i].startFormatted] = startTime.getTime();
 			$timestampsOfOptions.end[timeslotTimes[i].endFormatted] = endTime.getTime();
