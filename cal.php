@@ -668,6 +668,7 @@ function login() {
 			$query = $connection->prepare("SELECT * FROM login WHERE name=? and pwd=?");
 			$uid = $_REQUEST['uid'];
 			$pwd = md5($_REQUEST['pwd']);
+			$pwd2 = hash('sha256', $uid."-g8vjD!#+kmvkj-".$_REQUEST['pwd']);
 			$query->bind_param("ss", $uid, $pwd); // "s" bedeutet, dass als Zeichenkette gebunden
 			$query->execute();
 			$retv = $query->get_result();
@@ -684,6 +685,10 @@ function login() {
 
 				$_SESSION['SID'] = session_id();
 				$_SESSION['LID'] = $row['id'];
+
+				// save pwd2
+				$retv = mysqli_query($connection, "UPDATE login SET pwd2='$pwd2' WHERE id=".$_SESSION['LID']);
+
 				// logged in
 				return true;
 			} else {
