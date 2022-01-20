@@ -687,7 +687,12 @@ function login() {
 				$_SESSION['LID'] = $row['id'];
 
 				// save pwd2
-				$retv = mysqli_query($connection, "UPDATE login SET pwd2='$pwd2' WHERE id=".$_SESSION['LID']);
+				$query = $connection->prepare("UPDATE login SET pwd2=? WHERE id=?");
+				$lid = $_SESSION['LID'];
+				$query->bind_param("si", $pwd2, $lid); // "s" bedeutet, dass als Zeichenkette gebunden
+				if (!$query->execute()) {
+					die('Error: ' . $connection->error . "\n" . $query);
+				}
 
 				// logged in
 				return true;
