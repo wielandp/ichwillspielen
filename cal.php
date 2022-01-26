@@ -169,6 +169,7 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 	$thisip = getRemoteIP();
 	$bem = "";
 	$maxdate2 = $setupData['maxdate2'];
+	$hoursfree = 9; //2;
 
 	if (substr($start,0,10) > substr($setupData['maxdate'],0,10)
 	||	substr($start,0,10) < substr($setupData['mindate'],0,10)
@@ -205,10 +206,10 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
 			saveTransaction("Kollision2", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
 			die("Buchung in diesem Zeitraum nicht möglich 2.");
 		}
-        if ($typ == 1 && strlen($telnumber) != 6 && strtotime($start)-time()>(60*60*2)) {
+        if ($typ == 1 && strlen($telnumber) != 6 && strtotime($start)-time()>(60*60*$hoursfree)) {
             if (!isLoggedIn()) {
 				saveTransaction("Jzufrüh", $id, $title, $firstname, $lastname, $telnumber, $body, $start, $end, $typ, $uid);
-                die("Jugend-Buchungen können nur ab 2 Stunden vor Beginn eingetragen werden.");
+                die("Jugend-Buchungen können nur ab $hoursfree Stunden vor Beginn eingetragen werden.");
 			}
         }
         if ($typ == 1 && strlen($telnumber) == 6 && strtotime($start)-time()>(60*60*3)) {
@@ -217,9 +218,6 @@ function saveEntry($id, $title, $firstname, $lastname, $telnumber, $body, $start
                 die("3h-Jugend-Buchungen können nur ab 3 Stunden vor Beginn eingetragen werden.");
 			}
         }
-        if ($typ == 1 && strlen($telnumber) != 6 && !isLoggedIn() && strtotime($start)-time()>(60*60*2)-30) {
-			sleep(strtotime($start)-time()-(60*60*2)+30);
-		}
         if ($typ == 0 && strtotime($start)-time()>(60*60*24*7*4)) {
             if (!isLoggedIn())
                 die("Einzel-Buchungen können nur ab 4 Wochen vor Beginn eingetragen werden.");
@@ -665,11 +663,11 @@ function login() {
 
 	if (!isset($_SESSION['SID'])) {
 		if (isset($_REQUEST['uid']) && isset($_REQUEST['pwd'])) {
-			$query = $connection->prepare("SELECT * FROM login WHERE name=? and pwd=?");
+			$query = $connection->prepare("SELECT * FROM login WHERE name=? and pwd2=?");
 			$uid = $_REQUEST['uid'];
-			$pwd = md5($_REQUEST['pwd']);
+//			$pwd = md5($_REQUEST['pwd']);
 			$pwd2 = hash('sha256', $uid."-g8vjD!#+kmvkj-".$_REQUEST['pwd']);
-			$query->bind_param("ss", $uid, $pwd); // "s" bedeutet, dass als Zeichenkette gebunden
+			$query->bind_param("ss", $uid, $pwd2); // "s" bedeutet, dass als Zeichenkette gebunden
 			$query->execute();
 			$retv = $query->get_result();
 			if (!$retv) {
@@ -687,12 +685,12 @@ function login() {
 				$_SESSION['LID'] = $row['id'];
 
 				// save pwd2
-				$query = $connection->prepare("UPDATE login SET pwd2=? WHERE id=?");
-				$lid = $_SESSION['LID'];
-				$query->bind_param("si", $pwd2, $lid); // "s" bedeutet, dass als Zeichenkette gebunden
-				if (!$query->execute()) {
-					die('Error: ' . $connection->error . "\n" . $query);
-				}
+//				$query = $connection->prepare("UPDATE login SET pwd2=? WHERE id=?");
+//				$lid = $_SESSION['LID'];
+//				$query->bind_param("si", $pwd2, $lid); // "s" bedeutet, dass als Zeichenkette gebunden
+//				if (!$query->execute()) {
+//					die('Error: ' . $connection->error . "\n" . $query);
+//				}
 
 				// logged in
 				return true;
@@ -701,7 +699,7 @@ function login() {
 				logout();
 
 				$query = $connection->prepare("INSERT INTO accesslog (typ, fail, ipaddr, text) VALUES (1, 1, '$thisip', ?)");
-				$uidpwd = $_REQUEST['uid']."/".md5($_REQUEST['pwd']);
+				$uidpwd = $_REQUEST['uid']."/xxx";
 				$query->bind_param("s", $uidpwd); // "s" bedeutet, dass als Zeichenkette gebunden
 				if (!$query->execute()) {
 					die('Error: ' . $connection->error . "\n" . $query);
