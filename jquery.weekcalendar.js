@@ -1469,10 +1469,10 @@
             calEvent.start = start;
 
             // end of this virual calEvent is set to the end of the day
-            calEvent.end.setFullYear(start.getFullYear());
-            calEvent.end.setDate(start.getDate());
-            calEvent.end.setMonth(start.getMonth());
-            calEvent.end.setHours(maxHour, 0, 0);
+//            calEvent.end.setFullYear(start.getFullYear());
+//            calEvent.end.setDate(start.getDate());
+//            calEvent.end.setMonth(start.getMonth());
+//            calEvent.end.setHours(maxHour, 0, 0);
 
             if (($weekDay = self._findWeekDayForEvent(calEvent, $weekDayColumns))) {
               self._renderEvent(calEvent, $weekDay);
